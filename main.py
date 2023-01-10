@@ -25,5 +25,5 @@ class ClippyInit(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    clippy = ClippyInit()
+    clippyApp = ClippyInit()
     sys.exit(app.exec_())
