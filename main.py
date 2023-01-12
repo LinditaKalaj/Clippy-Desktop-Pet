@@ -2,6 +2,8 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
+from clippy import Clippy
+
 
 class ClippyInit(QWidget):
     def __init__(self):
@@ -21,6 +23,9 @@ class ClippyInit(QWidget):
         self.trayIcon.setIcon(QIcon("img/task_icon.png"))
         self.trayIcon.setContextMenu(self.trayIconMenu)
         self.trayIcon.show()
+
+        # Creates clippy
+        self.clippy = Clippy()
 
 
 if __name__ == "__main__":
