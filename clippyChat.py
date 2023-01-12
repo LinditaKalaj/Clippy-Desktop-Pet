@@ -2,7 +2,7 @@ import gtts as gtts
 import openai as openai
 import os
 
-from playsound import playsound
+import playsound
 from PyQt5 import QtCore
 from dotenv import load_dotenv
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -111,4 +111,4 @@ class Speak(QThread):
     def run(self):
         tts = gtts.gTTS(self.speech)
         tts.save("talk.mp3")
-        playsound("talk.mp3")
+        playsound.playsound("talk.mp3")
