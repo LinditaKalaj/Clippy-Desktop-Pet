@@ -1,11 +1,13 @@
+import platform
 import gtts as gtts
 import openai as openai
 import os
 
 from PyQt5 import QtCore, QtMultimedia
 from dotenv import load_dotenv
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QThread, QFileInfo, QUrl
 from PyQt5.QtWidgets import *
+from playsound import playsound
 
 # Chatbox class/gui for Clippy
 class ClippyChat(QWidget):
@@ -15,8 +17,6 @@ class ClippyChat(QWidget):
         self.d = None
         load_dotenv()
         openai.api_key = os.getenv("OPENAI_API_KEY")
-
-        self.player = QtMultimedia.QMediaPlayer()
 
         # Bool for clippy's talking animation
         self.talking = False
@@ -114,9 +114,16 @@ class Speak(QThread):
     def run(self):
         tts = gtts.gTTS(self.speech)
         tts.save("talk.mp3")
-        url = QtCore.QUrl.fromLocalFile("talk.mp3")
-        self.player.setMedia(QtMultimedia.QMediaContent(url))
-        self.player.play()
+        if platform.system() == "Windows":
+            self.player = QtMultimedia.QMediaPlayer()
+            url = QtCore.QUrl.fromLocalFile("talk.mp3")
+            print(url)
+            self.player.setMedia(QtMultimedia.QMediaContent(url))
+            self.player.setVolume(50)
+            self.player.play()
+        else:
+            playsound("talk.mp3")
+            self.talkingEnded.emit(None)
 
     def statusChanged(self, status):
         if status == QtMultimedia.QMediaPlayer.EndOfMedia:
