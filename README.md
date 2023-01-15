@@ -13,3 +13,7 @@ Visit https://beta.openai.com/account/api-keys. You'll need to log in to your ac
 
 ## Known Issues
 He has an outline around him when his window is focused on MacOS.
+
+## Credits 
+Mute button images:
+<a href="https://www.flaticon.com/free-icons/music-and-multimedia" title="music and multimedia icons">Music and multimedia icons created by IYAHICON - Flaticon</a>
