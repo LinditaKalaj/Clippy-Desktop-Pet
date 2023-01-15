@@ -2,7 +2,7 @@ from random import randint, random
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QTimer, QThread, QRunnable, QThreadPool
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5 import QtGui, QtCore
 
 from clippyChat import ClippyChat
