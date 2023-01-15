@@ -3,9 +3,9 @@ import gtts as gtts
 import openai as openai
 import os
 
-from PyQt5 import QtCore, QtMultimedia, QtGui
+from PyQt5 import QtCore
 from dotenv import load_dotenv
-from PyQt5.QtCore import Qt, QThread, QFileInfo, QUrl
+from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtWidgets import *
 from playsound import playsound
 
@@ -102,6 +102,7 @@ class ClippyChat(QWidget):
     def doneTalking(self):
         self.thinkLabel.setText("Listening ...")
         self.talking = False
+
 #Thread for ChatGPT inquiries
 class Type(QThread):
     gptResult = QtCore.pyqtSignal(object)
@@ -122,27 +123,15 @@ class Type(QThread):
         self.gptResult.emit(ai_response_msg)
 #Thread for speaking
 class Speak(QThread):
-    talkingEnded = QtCore.pyqtSignal(object)
+    talkingEnded = QtCore.pyqtSignal()
     def __init__(self, speech):
         super(QThread, self).__init__()
-        self.player = QtMultimedia.QMediaPlayer()
-        self.player.mediaStatusChanged.connect(self.statusChanged)
+        endPlay = QtCore.pyqtSignal()
         self.speech = speech
     # Plays Audio received from gTTS
     def run(self):
         tts = gtts.gTTS(self.speech)
         tts.save("talk.mp3")
-        if platform.system() == "Windows":
-            self.player = QtMultimedia.QMediaPlayer()
-            url = QtCore.QUrl.fromLocalFile("talk.mp3")
-            print(url)
-            self.player.setMedia(QtMultimedia.QMediaContent(url))
-            self.player.setVolume(50)
-            self.player.play()
-        else:
-            playsound("talk.mp3")
-            self.talkingEnded.emit(None)
-
-    def statusChanged(self, status):
-        if status == QtMultimedia.QMediaPlayer.EndOfMedia:
-            self.talkingEnded.emit(None)
+        playsound("talk.mp3")
+        os.remove("talk.mp3")
+        self.talkingEnded.emit()
