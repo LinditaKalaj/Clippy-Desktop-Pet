@@ -1,5 +1,5 @@
 # Desktop-Pet
-![OpenAI chat](/img/thinking2.png?raw=true "Clippy Thinking")
+![OpenAI chat](/img/thinkingani.gif?raw=true "Clippy Thinking")
 🚧 Work in progress 🚧
 
 https://user-images.githubusercontent.com/91567228/212504688-967f5d51-9d6b-48a2-9a2b-7b819fef9bdc.mp4
