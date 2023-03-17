@@ -1,13 +1,16 @@
 import gtts as gtts
 import openai as openai
 import os
-from PyQt5 import QtCore
+from PyQt6 import QtCore
+from PyQt6.QtCore import QUrl
+from PyQt6.QtMultimedia import *
 from dotenv import load_dotenv
-from PyQt5.QtCore import Qt, QThread
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import QThread
+from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QGridLayout, QPlainTextEdit, \
+    QLineEdit
 from playsound import playsound
 
-chat_log: []
+chat_log: None
 
 
 # Chatbox class/gui for Clippy
@@ -25,6 +28,12 @@ class ClippyChat(QWidget):
         self.worker = None
         self.worker_speak = None
         self.d = None
+        self.audio_output = QAudioOutput()
+        self.player = QMediaPlayer()
+        self.player.setAudioOutput(self.audio_output)
+        self.player.mediaStatusChanged.connect(self.player_status_callback)
+
+        # self._player.errorOccurred.connect(self._player_error)
         load_dotenv()
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -42,10 +51,8 @@ class ClippyChat(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.layout = QGridLayout()
+        self.layout = QGridLayout(self)
         self.info_sentence = QLabel("Let's Have a chat!", self)
-        self.info_sentence.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.info_sentence.setAlignment(Qt.AlignRight)
         self.chat_box = QPlainTextEdit(self)
         self.chat_box.setReadOnly(True)
         self.input_txt = QLineEdit(self)
@@ -65,20 +72,22 @@ class ClippyChat(QWidget):
         self.think_label = QLabel("Listening ... ", self)
 
         # Add widgets to grid
-        self.layout.addWidget(self.sound_button, 0, 1, alignment=QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.sound_button, 0, 1)
         self.layout.addWidget(self.info_sentence, 0, 0)
         self.layout.addWidget(self.chat_box, 1, 0, 2, 2)
         self.layout.addWidget(self.input_txt, 4, 0)
         self.layout.addWidget(self.send_button, 4, 1)
-        self.layout.addWidget(self.think_label, 3, 0, 1, 2)
+        self.layout.addWidget(self.think_label, 3, 0, 1, 1)
         self.setLayout(self.layout)
 
     # Changes the sound button styling to match the state
     def change_sound_style(self):
         if self.sound_button.isChecked():
             self.sound_button.setStyleSheet("border-image: url(img/silent.png);")
+            self.audio_output.setVolume(0)
         else:
             self.sound_button.setStyleSheet("border-image: url(img/sound.png);")
+            self.audio_output.setVolume(50)
 
     # Sends text from input to Chat GPT
     def send_to_gpt(self):
@@ -104,23 +113,34 @@ class ClippyChat(QWidget):
     """
 
     def complete(self, ai_response_msg):
-        self.think_label.setText("Talking ...")
-        self.input_txt.setDisabled(False)
-        self.send_button.setDisabled(False)
         self.input_txt.setFocus()
         self.chat_box.appendHtml("<b>Clippy: </b>" + ai_response_msg)
 
         # check if mute button is active
         if not self.sound_button.isChecked():
-            self.worker_speak = Speak(ai_response_msg)
-            self.worker_speak.talkingEnded.connect(self.done_talking)
+            self.worker_speak = LoadReply(ai_response_msg)
+            self.worker_speak.done_loading_reply.connect(self.done_loading_sound)
             self.worker_speak.start()
-            self.talking = True
+        else:
+            self.think_label.setText("Talking (telepathically)...")
+            self.input_txt.setDisabled(False)
+            self.send_button.setDisabled(False)
 
     # Callback for speech worker
-    def done_talking(self):
+    def done_loading_sound(self):
         self.think_label.setText("Listening ...")
-        self.talking = False
+        self.player.setSource(QUrl.fromLocalFile("talk.mp3"))
+        self.player.play()
+        self.input_txt.setDisabled(False)
+        self.send_button.setDisabled(False)
+
+    def player_status_callback(self, status):
+        if status == QMediaPlayer.MediaStatus.BufferedMedia:
+            self.talking = True
+            self.think_label.setText("Talking ...")
+        else:
+            self.talking = False
+            self.think_label.setText("Listening ...")
 
 
 # Thread for ChatGPT inquiries
@@ -143,18 +163,16 @@ class Type(QThread):
 
 
 # Thread for speaking
-class Speak(QThread):
-    talkingEnded = QtCore.pyqtSignal()
+class LoadReply(QThread):
+    done_loading_reply = QtCore.pyqtSignal()
 
-    def __init__(self, speech):
+    def __init__(self, reply):
         super(QThread, self).__init__()
         QtCore.pyqtSignal()
-        self.speech = speech
+        self.reply = reply
 
     # Plays Audio received from gTTS
     def run(self):
-        tts = gtts.gTTS(self.speech)
+        tts = gtts.gTTS(self.reply)
         tts.save("talk.mp3")
-        playsound("talk.mp3")
-        os.remove("talk.mp3")
-        self.talkingEnded.emit()
+        self.done_loading_reply.emit()

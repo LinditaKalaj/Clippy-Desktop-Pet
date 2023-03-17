@@ -1,9 +1,10 @@
 from random import randint
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5 import QtGui, QtCore
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6 import QtGui, QtCore
 from clippyChat import ClippyChat
+
 
 
 class Clippy(QWidget):
@@ -29,9 +30,9 @@ class Clippy(QWidget):
 
     def init_ui(self):
         # Remove window bar and make Clippy stay on top of windows and have translucent background
-        self.setWindowFlag(Qt.FramelessWindowHint)
-        self.setWindowFlag(Qt.WindowStaysOnTopHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        self.setAttribute(QtCore.Qt.WidgetAttribute(0x78))
         self.setAutoFillBackground(True)
 
         # label to display image
@@ -152,28 +153,28 @@ class Clippy(QWidget):
 
     # Sets clippy to the bottom right and the chat box next to him.
     def clippy_pos(self):
-        screen = QDesktopWidget().screenGeometry()
+        screen = QtGui.QGuiApplication.primaryScreen().availableGeometry()
         size = self.geometry()
         self.move((screen.width() - size.width()), (screen.height() - size.height() - 100))
         self.ask.move((screen.width() - size.width() - 310), (screen.height() - size.height() - 250))
 
     # Overrides functions to allow user to move Clippy
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.m_drag = True
-            self.m_DragPosition = event.globalPos() - self.pos()
+            self.m_DragPosition = event.globalPosition().toPoint() - self.pos()
             event.accept()
-            self.setCursor(QCursor(Qt.OpenHandCursor))
 
     # Mouse events to drag Clippy around
     def mouseMoveEvent(self, event):
-        if Qt.LeftButton and self.m_drag:
-            self.move(event.globalPos() - self.m_DragPosition)
+        if Qt.MouseButton.LeftButton and self.m_drag:
+            self.move(event.globalPosition().toPoint() - self.m_DragPosition)
             event.accept()
+            self.setCursor(QtCore.Qt.CursorShape.ClosedHandCursor)
 
     def mouseReleaseEvent(self, event):
         self.m_drag = False
-        self.setCursor(QCursor(Qt.ArrowCursor))
+        self.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
 
     # Double click to open chat box
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent) -> None:

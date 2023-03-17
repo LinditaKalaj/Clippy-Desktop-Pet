@@ -1,5 +1,5 @@
 gTTS==2.3.0
 openai==0.27.0
 playsound==1.2.2
-PyQt5==5.15.7
 python-dotenv==0.21.0
+PyQt6~=6.4.2
