@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt6.QtWidgets import QWidget, QApplication, QMenu, QSystemTrayIcon
+from PyQt6.QtGui import QIcon, QAction
 from clippy import Clippy
 
 
@@ -35,4 +35,4 @@ class ClippyInit(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     clippyApp = ClippyInit()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
