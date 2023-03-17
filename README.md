@@ -1,6 +1,9 @@
 # Desktop-Pet
 ![OpenAI chat](/img/thinkingani.gif?raw=true "Clippy Thinking")
+
 🚧 Work in progress 🚧
+
+Now with GPT 3.5 turbo! (With extra rizz and spice)
 
 https://user-images.githubusercontent.com/91567228/212504688-967f5d51-9d6b-48a2-9a2b-7b819fef9bdc.mp4
 
