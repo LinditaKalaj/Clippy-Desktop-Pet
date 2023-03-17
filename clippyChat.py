@@ -9,6 +9,7 @@ from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtWidgets import *
 from playsound import playsound
 
+
 # Chatbox class/gui for Clippy
 class ClippyChat(QWidget):
     def __init__(self):
@@ -17,6 +18,12 @@ class ClippyChat(QWidget):
         self.d = None
         load_dotenv()
         openai.api_key = os.getenv("OPENAI_API_KEY")
+
+        # Clippy's chat log
+        global chatLog
+        chatLog = [{"role": "system", "content": "You are a helpful and sassy assistant, "
+                    "specifically you are Clippy from Microsoft Word. "
+                    "Also, try to be funny and show some of that rizz you got"}]
 
         # Bool for clippy's talking animation
         self.talking = False
@@ -66,8 +73,9 @@ class ClippyChat(QWidget):
     # Sends text from input to Chat GPT
     def sendToChatGPT(self):
         question = self.inputTxt.text()
+        chatLog.append({"role": "user", "content": question})
         # Thread to allow gui to function while it queries chatGPT
-        self.worker = Type(question)
+        self.worker = Type()
         self.worker.gptResult.connect(self.complete)
         self.chatBox.appendHtml("<b>You: </b>" + question)
         self.inputTxt.clear()
@@ -106,20 +114,19 @@ class ClippyChat(QWidget):
 #Thread for ChatGPT inquiries
 class Type(QThread):
     gptResult = QtCore.pyqtSignal(object)
-    def __init__(self, text):
+    def __init__(self):
         super(QThread, self).__init__()
-        self.text = text
+        print(chatLog)
 
     def run(self):
-        ai_response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=self.text,
-            temperature=1,
-            max_tokens=2000,
+        ai_response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages = chatLog,
+            temperature = .9  
         )
         # parse for the response text
-        ai_response_msg = ai_response.choices[0].text
-        print(ai_response_msg)
+        ai_response_msg = ai_response['choices'][0]['message']['content']
+        chatLog.append({"role": "assistant", "content": ai_response_msg})
         self.gptResult.emit(ai_response_msg)
 #Thread for speaking
 class Speak(QThread):
